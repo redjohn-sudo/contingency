@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contingency | Grid capacity study</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%233859f5'/%3E%3Cpath d='M27 12H16l-5 8 5 8h11M21 12l-5 8 5 8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/interface.css?v=12">
+<link rel="stylesheet" href="/factory.css?v=6">
+</head><body>
+<main>
+<header class="app-header">
+<a class="brand" href="/demo" aria-label="Contingency home"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11"/><path d="M28 11H16l-6 9 6 9h12M22 11l-6 9 6 9"/></svg><span>contingency<span class="brand-dot">.</span></span></a>
+
+<div class="header-actions"><span class="session-state"><i></i><span id="session-label">Nouveau dossier</span></span></div>
+</header>
+<nav class="steps" aria-label="Study steps">
+<button type="button" data-step="0" aria-current="step"><span class="step-number">01</span><span><strong data-fr="Le dossier" data-en="Factory">Le dossier</strong><small data-fr="Poser le problème" data-en="Define the problem">Poser le problème</small></span><span class="step-arrow">↗</span></button>
+<button type="button" data-step="4" disabled><span class="step-number">02</span><span><strong>Documents</strong></span><span class="step-arrow">↗</span></button>
+<button type="button" data-step="1" disabled><span class="step-number">03</span><span><strong data-fr="Les données" data-en="Review">Les données</strong><small data-fr="Vérifier les sources" data-en="Check the evidence">Vérifier les sources</small></span><span class="step-arrow">↗</span></button>
+<button type="button" data-step="2" disabled><span class="step-number">04</span><span><strong data-fr="La simulation" data-en="Simulation">La simulation</strong><small data-fr="Valider les hypothèses" data-en="Approve assumptions">Valider les hypothèses</small></span><span class="step-arrow">↗</span></button>
+<button type="button" data-step="3" disabled><span class="step-number">05</span><span><strong data-fr="Le résultat" data-en="Results">Le résultat</strong><small data-fr="Comparer les possibilités" data-en="Compare the options">Comparer les possibilités</small></span><span class="step-arrow">↗</span></button>
+</nav>
+<div id="message" role="status" aria-live="polite"></div>
+<div class="workspace">
+<section class="etape introduction" id="depart" data-panel="0">
+<div class="hero-copy"><div class="section-index"><span></span><span data-fr="De vos documents à une décision éclairée" data-en="From documents to an informed decision">De vos documents à une décision éclairée</span></div>
+<h1>Une nouvelle machine.<br><span>La même limite électrique.</span></h1>
+</div>
+<div class="start-layout">
+<div class="start-card">
+<div class="document-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M13 5h15l9 9v29H13z"/><path d="M28 5v10h9M19 23h12M19 29h12M19 35h8"/></svg></div>
+<h2>Constituer le dossier</h2>
+<p>Rassemblez le contrat du site, les fiches techniques et les mesures de consommation.</p>
+<div class="grille import-grid"><div><label for="documents">Documents PDF ou TXT</label><input id="documents" type="file" multiple accept=".pdf,.txt"></div><div><label for="profil">Consommation au fil du temps (CSV)</label><input id="profil" type="file" accept=".csv"></div></div>
+<button id="importer">Ouvrir le dossier</button><button class="secondaire" id="exemple">Essayer le cas fictif</button>
+<small>L’exemple décrit une journée fictive. Aucun fichier n’est envoyé à un service externe.</small>
+<details class="import-help"><summary data-fr="Formats des fichiers" data-en="File formats">Formats des fichiers</summary><p>20 documents maximum, 5 Mio chacun. CSV : fin_intervalle,puissance_kw, une mesure toutes les 15 minutes, journées complètes de 96 mesures.</p></details>
+</div>
+<div class="system-scene" aria-label="Concept: power grid, factory and battery">
+
+<svg class="energy-map" viewBox="0 0 640 370" role="img" aria-label="The grid supplies the factory. A battery can provide additional power.">
+<defs><linearGradient id="node-blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7799ff"/><stop offset="1" stop-color="#3558f5"/></linearGradient><filter id="node-shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#3256ed" flood-opacity=".16"/></filter></defs>
+<path class="energy-path" d="M152 165H485M330 165V288H475"/>
+<path class="energy-flow" d="M152 165H485M330 165V288H475"/>
+<g transform="translate(72 113)"><rect class="map-node" width="104" height="104" rx="24"/><g class="map-icon" transform="translate(26 23)"><path d="M25 1L7 58M25 1l18 57M13 17h25M9 33h33M4 49h44M17 17l19 16-25 16M33 17L14 33l25 16"/></g></g>
+<g transform="translate(454 106)" filter="url(#node-shadow)"><rect width="120" height="118" rx="26" fill="url(#node-blue)"/><g class="factory-icon" transform="translate(27 28)"><path d="M0 58V24l20-12v16l20-12v42zM40 58V1h17v57M8 43h5m9 0h5m-19 9h5m9 0h5"/></g></g>
+<g transform="translate(475 261)"><rect class="map-node" width="68" height="56" rx="15"/><g class="map-icon" transform="translate(17 18)"><rect width="30" height="20" rx="4"/><path d="M33 6v8M8 6v8m7-8v8m7-8v8"/></g></g>
+<g class="map-text"><text x="124" y="247" text-anchor="middle" data-fr="Réseau" data-en="Power grid">Réseau</text><text x="515" y="247" text-anchor="middle" data-fr="Votre usine" data-en="Your factory">Votre usine</text><text x="510" y="345" text-anchor="middle" data-fr="Batterie" data-en="Battery">Batterie</text></g>
+<g class="map-tag"><rect x="227" y="139" width="183" height="48" rx="24"/><text x="318" y="169" text-anchor="middle" data-fr="Puissance limitée" data-en="Limited grid power">Puissance limitée</text></g>
+</svg>
+
+</div></div>
+
+</section>
+<section id="machine-documents" class="etape is-inactive" data-panel="4">
+<div class="stage-heading"><h2>Documents</h2><button type="button" class="secondaire" id="back-to-factory">Back to factory</button></div>
+<div class="document-workspace"><div class="document-packs" id="document-packs"></div><aside class="document-upload"><h3>Add documents</h3><button type="button" id="use-own-documents" class="secondaire">Use my documents</button><label class="file-drop" for="machine-files"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/></svg><strong>Choose files or drop them here</strong><span>PDF or TXT · up to 5 MB each</span><input id="machine-files" type="file" accept=".pdf,.txt" multiple></label><div id="pending-files"></div><details class="document-note"><summary>What should I add?</summary><p>The grid contract sets your power limit. Machine specifications give power requirements. Operating schedules give runtime and working hours. Battery quotations define storage limits.</p></details><p id="document-error" role="alert" hidden></p><button id="review-without-ai" class="secondaire" hidden>Review documents</button></aside></div>
+<button id="analyze-documents">Analyze documents →</button>
+</section>
+<section id="verification" class="etape" data-panel="1" hidden>
+<div class="stage-heading"><div><span class="section-index" data-fr="02 / Vérifier" data-en="02 / Review">02 / Vérifier</span><h2 data-fr="Les bons chiffres. Les bonnes sources." data-en="Review inputs.">Les bons chiffres. Les bonnes sources.</h2><p data-fr="L’IA propose. Vous vérifiez ce qui servira au calcul." data-en="Confirm each input, then review the open questions.">L’IA propose. Vous vérifiez ce qui servira au calcul.</p></div><button class="secondaire" id="show-documents" type="button" data-fr="Consulter les documents ↗" data-en="Documents">Consulter les documents ↗</button></div>
+<details class="source-drawer" id="document-drawer"><summary>Documents et contexte du dossier</summary><p id="nature"></p><div id="sources"></div></details>
+<div class="review-content"><p id="review-position"></p>
+<div class="extraction-action"><button id="extraire">Lire les documents avec Nebius</button><small>Le texte complet des documents est envoyé à Nebius pour comparer les sources. Aucune proposition n’est appliquée sans votre acceptation.</small></div>
+<div class="review-intro"><details class="unit-help"><summary>Units explained</summary><p><strong>kW</strong> measures power: how much electricity a machine needs at a given moment.<br><strong>kWh</strong> measures energy: how much a battery can store. A 10 kW machine running for 2 hours uses 20 kWh.</p></details></div>
+<div id="demo-tools"></div><p id="bilan-valeurs" class="sr-only" aria-live="polite"></p><div id="faits"></div>
+<details class="technical-details"><summary>AI details</summary><div id="propositions-ia" hidden></div></details>
+<div id="audit-documentaire"></div>
+<section class="custom-constraints" aria-labelledby="custom-constraints-title">
+<h3 id="custom-constraints-title">Contraintes métier de l’ingénieur</h3>
+<p>Ajoutez une règle propre au site. Elle restera à revoir et ne sera jamais présentée comme une règle nationale automatiquement.</p>
+<div id="contraintes-selectionnees"></div>
+<form id="contrainte-personnalisee">
+<div class="grille"><div><label for="contrainte-nom">Nom</label><input id="contrainte-nom" required></div><div><label for="contrainte-regle">Règle mesurable</label><input id="contrainte-regle" placeholder="niveau_db_nuit <= 45" required></div><div><label for="contrainte-source">Source</label><input id="contrainte-source" placeholder="Contrat, courrier ou norme" required></div><div><label for="contrainte-consequence">Conséquence</label><input id="contrainte-consequence" required></div></div>
+<label for="contrainte-confiance">Confiance</label><select id="contrainte-confiance"><option value="a_verifier">À vérifier</option><option value="verifie">Vérifiée</option><option value="temoignage">Témoignage</option><option value="hypothese">Hypothèse</option></select>
+<button type="submit" class="secondaire">Ajouter la contrainte</button>
+</form></section>
+</div><button id="preparer" aria-describedby="journey-status">Continue →</button></section>
+<section id="validation" class="etape" data-panel="2" hidden><div class="stage-heading"><div><span class="section-index" data-fr="03 / Simuler" data-en="03 / Simulate">03 / Simuler</span><h2 data-fr="Voici ce que nous allons calculer." data-en="Run the simulation.">Voici ce que nous allons calculer.</h2><p data-fr="Vérifiez une dernière fois les hypothèses de cette simulation." data-en="Review the assumptions for this simulation one last time.">Vérifiez une dernière fois les hypothèses de cette simulation.</p></div></div>
+<div class="validation-layout"><div class="validation-inputs" id="validation-summary"></div><div class="approval-card"><label class="approval-check"><input type="checkbox" id="accord">I approve these inputs and assumptions.</label><button id="calculer" disabled>Calculer les scénarios</button><button class="secondaire" id="back-inputs" data-fr="Modifier les valeurs" data-en="Edit inputs">Modifier les valeurs</button></div></div>
+<details class="model-scope"><summary data-fr="Ce que la simulation prend en compte" data-en="What the simulation includes">Ce que la simulation prend en compte</summary><p>Un cycle machine par bloc de 24 heures. Les horaires désignent des positions dans ce bloc, pas un calendrier de travail vérifié. Batterie à rendement constant, état initial libre et cyclique. Une recherche conjointe est tentée sur les dossiers de sept blocs maximum. Le rapport indique si l’optimalité est prouvée dans ce modèle.</p></details><p class="important-limit" id="validation-limit"></p></section>
+<section id="resultat" class="etape" data-panel="3" hidden><div class="stage-heading"><div><span class="section-index" data-fr="04 / Décider" data-en="04 / Decide">04 / Décider</span><h2 data-fr="Un scénario à examiner." data-en="Your results.">Un scénario à examiner.</h2><p>Capacité utile pour le lissage des pointes dans le modèle déclaré.</p></div><button class="secondaire" id="compare-again" data-fr="Tester un autre horaire ↗" data-en="Change schedule">Tester un autre horaire ↗</button></div>
+<div id="outcome-story" aria-live="polite"></div><p class="important-limit" id="result-limit"></p>
+<details id="details-calcul"><summary>Details</summary><div id="comparaison-variantes" hidden></div><div id="chiffres" class="grille result-numbers"></div><div id="graphique-planning" hidden></div><p id="conclusion"></p><small>Capacité utile théorique, pas capacité commerciale. Aucune économie financière ou de temps humain mesurée. Une éventuelle preuve d’optimalité reste limitée au modèle déclaré.</small></details><div class="result-actions"><a id="rapport-lisible" class="lien" target="_blank" rel="noopener">Ouvrir le rapport</a><details class="download-details"><summary>Download technical files</summary><a id="donnees" class="lien secondaire">Télécharger les données</a></details></div></section>
+</div><div class="journey-bar"><div class="journey-progress"><span id="journey-step"></span><strong id="journey-status" aria-live="polite"></strong></div><div class="journey-actions"><button id="review-remaining" class="secondaire" hidden>Review remaining</button><div id="journey-primary"></div></div></div>
+</main>
+<script src="/english.js"></script>
+<script src="/preuves.js"></script>
+<script src="/sensibilite.js"></script>
+<script src="/revue-documentaire.js?v=8"></script>
+<script src="/graphiques.js?v=2"></script>
+<script>
+let dossier=null;let historiqueCalculs=[];const $=id=>document.getElementById(id);const echappe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function lectureStructuree(doc){const l=doc.lecture_structuree;if(!l)return '';let sortie=`<p class="lecture">${echappe(l.message)}</p>`;if(l.controle)sortie+=`<p>${echappe(l.controle.message)} Nombres à contrôler : ${echappe(l.controle.nombres_non_retrouves_dans_structure.join(', ')||'aucun signalé')}.</p>`;for(const t of l.tableaux||[]){sortie+=`<p>Tableau reconstruit, page ${t.page}</p><div class="tableau"><table>`;for(let r=0;r<t.lignes;r++){sortie+='<tr>';for(const c of t.cellules.filter(c=>c.start_row_offset_idx===r).sort((a,b)=>a.start_col_offset_idx-b.start_col_offset_idx)){const balise=c.column_header?'th':'td';sortie+=`<${balise} rowspan="${c.row_span}" colspan="${c.col_span}">${echappe(c.text)}</${balise}>`;}sortie+='</tr>';}sortie+='</table></div>';}return sortie;}
+async function appel(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});const j=await r.json();if(!r.ok)throw Error(j.detail||'Traitement impossible');return j}
+function lienOriginal(numero,ligne){
+  const doc=dossier.documents[numero];
+  if(!doc?.source_pdf)return '';
+  const page=(doc.lecture_ocr?.pages||[]).find(p=>(p.plages_lignes||[]).some(plage=>ligne>=plage.debut&&ligne<=plage.fin))?.page;
+  const url=`/api/${encodeURIComponent(dossier.id)}/source/${numero}${Number.isInteger(page)?`#page=${page}`:''}`;
+  return `<a class="source-originale" href="${url}" target="_blank" rel="noopener">Ouvrir le PDF original</a>`;
+}
+function lectureOCR(doc,numero){
+  const lecture=doc.lecture_ocr;
+  let sortie=lienOriginal(numero);
+  if(!lecture?.pages_ocr?.length)return sortie+(lecture?.message?`<p class="lecture">${echappe(lecture.message)}</p>`:'');
+  sortie+='<p class="lecture">Lecture OCR à vérifier sur le PDF original. Des lignes entières peuvent manquer, même avec de bons scores de lecture.</p>';
+  if(lecture.avertissements?.length)sortie+=`<ul class="alerte-ia">${lecture.avertissements.map(a=>`<li>${echappe(uiText(a))}</li>`).join('')}</ul>`;
+  return sortie;
+}
+async function action(f){
+  if(document.body.classList.contains('busy'))return;
+  document.body.classList.add('busy');document.querySelector('main').setAttribute('aria-busy','true');
+  $('message').className='';$('message').textContent=document.documentElement.lang==='en'?'Processing…':'Traitement en cours…';
+  try{await f();$('message').textContent=''}catch(e){
+    $('message').className='erreur';$('message').textContent=window.uiText(e.message);
+    if(e.message.includes('Chaque alerte'))window.parcours?.review('issues');
+    $('message').scrollIntoView({block:'start',behavior:'smooth'});
+  }finally{document.body.classList.remove('busy');document.querySelector('main').removeAttribute('aria-busy');window.parcours?.sync()}
+}
+function invalider(){if(dossier)dossier.revision=null;$('validation').hidden=true;$('resultat').hidden=true;$('accord').checked=false;$('calculer').disabled=true;window.parcours?.sync()}
+
+function actualiserValeurs(){
+  const lignes=[...document.querySelectorAll('#faits .fait')];
+  $('bilan-valeurs').textContent=`${lignes.filter(e=>e.querySelector('.val').value!=='').length} / ${lignes.length} paramètres renseignés. La validation reste à faire.`;
+  lignes.forEach(el=>{
+    const cle=el.dataset.cle,val=el.querySelector('.val').value;
+    const doc=Number(el.querySelector('.doc').value),ligne=Number(el.querySelector('.ligne').value);
+    const proposed=dossier.extraction_ia?.propositions?.[cle];
+    const shown=val===''?proposed?.valeur:val;
+    el.querySelector('.val').placeholder=shown==null?'Enter value':String(shown);
+    el.querySelector('.fait-retenu').textContent=shown==null?'—':`${Number(shown).toLocaleString('en-GB',{maximumFractionDigits:4})} ${dossier.champs[cle][1]}`;
+    const matches=val!==''&&proposed?.valeur!=null&&Number(val)===proposed.valeur&&doc===proposed.document&&ligne===proposed.ligne;
+    el.classList.toggle('has-selection',val!=='');el.classList.toggle('matches-proposal',matches);
+    el.querySelector('.selected-citation').textContent=el.querySelector('.citation').textContent;
+    if(el.querySelector('.value-origin'))el.querySelector('.value-origin').textContent=val!==''&&doc<0?'Assumption':'';
+    el.querySelector('.input-state').textContent=val===''?(shown==null?'Needs clarification':'Proposed'):matches?'Confirmed':doc<0?'Assumption':'Edited input';
+    el.querySelector('.source-retenue').textContent=val===''?'Aucune valeur retenue.':doc<0?'Simulation assumption':`${dossier.documents[doc]?.nom||'Source à vérifier'}, ligne ${ligne}`;
+    const proposition=dossier.extraction_ia?.propositions?.[cle];
+    const caseACocher=document.querySelector(`[data-proposition="${cle}"] .accepter-ia`);
+    if(caseACocher?.checked && (!proposition || Number(val)!==proposition.valeur || val==='' || doc!==proposition.document || ligne!==proposition.ligne))caseACocher.checked=false;
+  });
+  window.parcours?.sync();
+}
+
+function afficherPropositions(){
+  const extraction=dossier.extraction_ia,zone=$('propositions-ia');
+  if(!extraction){zone.hidden=true;zone.innerHTML='';return}
+  const entrees=Object.entries(extraction.propositions);
+  const alertes=(extraction.alertes||[]).map(a=>`<li>${echappe(uiText(a))}</li>`).join('');
+  const routage=extraction.routage_agents;
+  const indication=routage?.second_avis_requis?`Second avis ${echappe(routage.agent_second_avis)} recommandé : ${echappe(routage.raisons.join(', '))}.`:'Second avis non nécessaire pour le moment.';
+  zone.innerHTML=`<details><summary>Original model response and checks</summary><p class="original-content">${echappe(extraction.resume)}</p><p class="meta-ia">${echappe(extraction.modele)}. Citations and values checked by local rules; applicability still needs review. ${indication}</p>${alertes?`<ul class="alerte-ia">${alertes}</ul>`:''}</details>`+
+    entrees.map(([cle,p])=>{
+      const disponible=p.valeur!==null;
+      const source=p.document>=0?`${dossier.documents[p.document]?.nom||'Document'}, ligne ${p.ligne}`:'Preuve insuffisante ou valeur bloquée';
+      const documentSource=dossier.documents[p.document];
+      const pageSource=(documentSource?.lecture_ocr?.pages||[]).find(page=>(page.plages_lignes||[]).some(plage=>p.ligne>=plage.debut&&p.ligne<=plage.fin));
+      const issueOCR=pageSource?.a_verifier || (!pageSource && documentSource?.lecture_ocr?.pages_ocr?.length);
+      return `<div class="proposition ${disponible?'':'bloquee'}" data-proposition="${cle}">
+        <span class="source-courte">${echappe(source)} ${boutonPreuve(p.document,p.ligne,p.citation)} ${lienOriginal(p.document,p.ligne)}${issueOCR?'<small class="alerte-ia">Valeur issue d’un scan : comparer les chiffres au PDF original avant de la retenir.</small>':''}</span>
+        <details class="proposal-evidence"><summary>Source</summary><p class="original-proposal">Original suggestion: ${disponible?`${p.valeur} ${echappe(dossier.champs[cle][1])}`:"No usable value"}</p>
+          ${p.citation?`<blockquote>${echappe(p.citation)}</blockquote>`:''}
+          ${(p.preuves||[]).map(pr=>`<p>${echappe(pr.repere)} : ${pr.valide?'citation retrouvée':'preuve refusée'}</p><blockquote>${echappe(pr.citation)}</blockquote>${boutonRepere(pr)}`).join('')}
+          <p class="meta-ia">${echappe(uiText(p.controle))}${p.alerte?' '+echappe(uiText(p.alerte)):''}</p>
+        </details>
+        <label><input type="checkbox" class="accepter-ia" ${disponible?'':'disabled'}>${disponible?'Confirm':'Enter an assumption using Edit'}</label>
+      </div>`;
+    }).join('');
+  zone.hidden=false;
+  zone.querySelectorAll('.proposition').forEach(el=>{el.querySelector('.proposal-evidence').append(el.querySelector('.source-courte'));document.querySelector(`#faits [data-cle="${el.dataset.proposition}"] .edition-fait`).before(el)});
+  document.querySelectorAll('.accepter-ia').forEach(caseACocher=>caseACocher.onchange=()=>{
+    const cle=caseACocher.closest('.proposition').dataset.proposition;
+    const p=caseACocher.checked?extraction.propositions[cle]:{valeur:null,document:-1,ligne:0,motif:''};
+    const fait=document.querySelector(`#faits .fait[data-cle="${cle}"]`);
+    fait.querySelector('.val').value=p.valeur??'';
+    fait.querySelector('.doc').value=p.document;
+    fait.querySelector('.ligne').value=p.ligne;
+    fait.querySelector('.motif').value=caseACocher.checked?'Nebius proposal accepted after human review.':(p.motif||'');
+    fait.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+}
+function afficherContraintes(d){
+  const zone=$('contraintes-selectionnees');
+  const contraintes=d.contraintes||[];
+  zone.innerHTML=contraintes.length?`<ul>${contraintes.map(c=>`<li><strong>${echappe(c.id)}</strong> ${echappe(c.nom)} <small>· ${echappe(c.statut||'a_revoir')} · ${echappe(c.confiance||'a_verifier')}</small></li>`).join('')}</ul>`:'<p>Aucune contrainte métier ajoutée pour ce dossier.</p>';
+  const form=$('contrainte-personnalisee');
+  form.onsubmit=event=>action(async()=>{
+    event.preventDefault();
+    const personnalisees=(dossier.contraintes||[]).filter(c=>c.origine==='ingenieur').map(c=>({nom:c.nom,forme_mesurable:c.forme_mesurable,source:c.source,consequence:c.consequence,confiance:c.confiance}));
+    personnalisees.push({nom:$('contrainte-nom').value,forme_mesurable:$('contrainte-regle').value,source:$('contrainte-source').value,consequence:$('contrainte-consequence').value,confiance:$('contrainte-confiance').value});
+    const ids=(dossier.contraintes||[]).filter(c=>!c.id.startsWith('CUSTOM-')).map(c=>c.id);
+    dossier=await appel(`/api/${dossier.id}/contraintes`,{ids,personnalisees});
+    form.reset();afficherContraintes(dossier);
+  });
+}
+
+function installerDetailsFaits(){
+  document.querySelectorAll('#faits>.fait').forEach(row=>{
+    const key=row.dataset.cle;
+    const field=row.querySelector('.val'), editor=document.createElement('div');
+    editor.className='inline-value';
+    const label=field.previousElementSibling;label.textContent=window.parcours?.label(key)||key;label.className='sr-only';
+    editor.append(label,field);
+    const unit=document.createElement('span');unit.textContent=dossier.champs[key][1];editor.append(unit);
+    field.placeholder='Enter value';field.setAttribute('inputmode','decimal');
+    field.setAttribute('aria-describedby',`value-origin-${key}`);
+    const origin=document.createElement('small');origin.id=`value-origin-${key}`;origin.className='value-origin';editor.append(origin);
+    row.prepend(editor);
+    const bar=document.createElement('div');bar.className='fact-actions';
+    bar.innerHTML=`<button type="button" data-disclosure="source" aria-expanded="false">Source</button><button type="button" data-disclosure="edit" aria-expanded="false" aria-controls="edit-${key}">Edit</button>`;
+    row.append(bar);
+    const panels=[...row.querySelectorAll('.proposal-evidence,.selected-evidence,.edition-fait')];
+    panels.forEach(panel=>{
+      panel.id=`${panel.classList.contains('edition-fait')?'edit':panel.classList.contains('selected-evidence')?'selected':'proposal'}-${key}`;
+      panel.querySelector('summary').hidden=true;
+      panel.addEventListener('toggle',()=>{
+        if(panel.open)panels.forEach(other=>{if(other!==panel)other.open=false});
+        bar.querySelector('[data-disclosure="edit"]').setAttribute('aria-expanded',String(row.querySelector('.edition-fait').open));
+        bar.querySelector('[data-disclosure="source"]').setAttribute('aria-expanded',String(panels.some(p=>!p.classList.contains('edition-fait')&&p.open)));
+      });
+    });
+    bar.querySelectorAll('button').forEach(button=>button.onclick=()=>{
+      const panel=button.dataset.disclosure==='edit'?row.querySelector('.edition-fait'):
+        row.querySelector(row.classList.contains('has-selection')&&!row.classList.contains('matches-proposal')?'.selected-evidence':'.proposal-evidence')||row.querySelector('.selected-evidence');
+      button.setAttribute('aria-controls',panel.id);
+      panel.open=!panel.open;
+    });
+  });
+}
+
+function afficher(d){
+  if(dossier?.id!==d.id)historiqueCalculs=[];
+  dossier=d;invalider();$('verification').hidden=false;
+  $('nature').textContent=location.pathname==='/demo'&&!window.CONTINGENCY_LIVE_AI?`${d.documents.length} documents, ${d.nombre_mesures} readings. Public documents and constructed site inputs; simulated demand. Recorded AI walkthrough; live analysis uses DeepSeek via Nebius.`:d.nature+' '+d.nombre_mesures+' readings.';
+  $('sources').innerHTML=d.documents.map((s,i)=>`<details><summary>Source ${i+1} : ${echappe(s.nom)}</summary>${lectureOCR(s,i)}<pre>${echappe(s.texte.split('\n').map((l,n)=>`${n+1}  ${l}`).join('\n'))}</pre>${lectureStructuree(s)}</details>`).join('');
+  $('faits').innerHTML=Object.entries(d.champs).map(([cle,[nom,unite]])=>{
+    const f=d.faits[cle];
+    return `<div class="fait" data-cle="${cle}">
+      <div class="fait-entete"><div><strong>${echappe(window.parcours?.label(cle)||nom)}</strong><span class="input-state"></span></div><span class="fait-retenu"></span></div><details class="selected-evidence"><summary>Source</summary><p class="source-retenue"></p><p class="selected-citation original-content"></p></details>
+      <details class="edition-fait"><summary>Edit<span class="sr-only"> ${echappe(nom)}</span></summary><div class="grille">
+      <div><label for="v-${cle}">Valeur (${echappe(unite)})</label><input id="v-${cle}" class="val" type="number" step="any" min="0" value="${f.valeur??''}"></div>
+      <div><label for="s-${cle}">Source</label><select id="s-${cle}" class="doc"><option value="-1">Hypothèse à justifier</option>${d.documents.map((s,i)=>`<option value="${i}" ${f.document===i?'selected':''}>${echappe(s.nom)}</option>`).join('')}</select></div>
+      <div><label for="l-${cle}">Ligne source</label><input id="l-${cle}" class="ligne" type="number" min="0" step="1" value="${f.ligne}"></div>
+      <div><label for="m-${cle}">Justification / correction</label><input id="m-${cle}" class="motif" value="${echappe(f.motif)}"></div>
+      </div><blockquote class="citation"></blockquote></details></div>`;
+  }).join('');
+  document.querySelectorAll('#faits .fait').forEach(el=>{
+    const citer=()=>{const i=Number(el.querySelector('.doc').value),n=Number(el.querySelector('.ligne').value);el.querySelector('.citation').textContent=i<0?(el.querySelector('.motif').value.trim()||'No reason provided yet.'):(dossier.documents[i].texte.split('\n')[n-1]||'Choose a non-empty source line.');el.querySelector('.citation').hidden=i<0};
+    el.addEventListener('input',event=>{if(event.target.matches('.accepter-ia'))return;
+      if(event.target.matches('.val')){
+        el.querySelector('.doc').value='-1';el.querySelector('.ligne').value='0';
+        el.querySelector('.motif').value='User-entered scenario value; not verified against source documents.';
+      }
+      invalider();citer();actualiserValeurs()});citer();
+  });
+  afficherAudit(d);afficherPropositions();afficherContraintes(d);installerDetailsFaits();actualiserValeurs();
+  window.parcours?.open(1); window.parcours?.review('issues');window.factory?.loaded(d);
+}
+
+function comparerCalculs(){
+  const r=dossier.resultat;
+  const courant={revision:dossier.revision,faits:structuredClone(dossier.faits),resultat:structuredClone(r)};
+  if(historiqueCalculs.at(-1)?.revision!==courant.revision)historiqueCalculs.push(courant);
+  const zone=$('comparaison-variantes');zone.hidden=true;zone.innerHTML='';$('details-calcul').open=false;
+  if(historiqueCalculs.length<2)return;
+  const precedent=historiqueCalculs.at(-2);
+  if(precedent.resultat.retenu.statut!==0||r.retenu.statut!==0)return;
+  const chiffres=v=>v.toLocaleString('en-GB',{maximumFractionDigits:2});
+  const changements=Object.keys(dossier.champs).filter(c=>precedent.faits[c].valeur!==courant.faits[c].valeur);
+  zone.innerHTML=`<h3>Comparer les simulations</h3>
+    <div class="comparaison-chiffres"><div><small>Simulation précédente</small><strong>${chiffres(precedent.resultat.retenu.capacite_utile_kwh)}<small>kWh de lissage</small></strong></div><span class="fleche" aria-hidden="true">→</span><div><small>Simulation actuelle</small><strong class="apres">${chiffres(r.retenu.capacite_utile_kwh)}<small>kWh de lissage</small></strong></div></div>
+    <p>${changements.length?changements.map(c=>`${echappe(dossier.champs[c][0])} : ${chiffres(precedent.faits[c].valeur)} → ${chiffres(courant.faits[c].valeur)} ${echappe(dossier.champs[c][1])}`).join(' · '):'Valeurs identiques ; sources ou hypothèses de revue modifiées.'}</p>
+    <small>Deux calculs exécutés après validation explicite. Réserve de secours non modélisée : zéro lissage ne signifie pas zéro batterie.</small>`;
+  zone.hidden=false;$('details-calcul').open=false;
+}
+$('exemple').onclick=()=>action(async()=>afficher(await appel('/api/exemple')));
+$('importer').onclick=()=>action(async()=>{const fichiers=[...$('documents').files],profil=$('profil').files[0];if(!fichiers.length||!profil)throw Error('Choisissez les documents et le profil CSV.');if(fichiers.some(f=>f.size>5*1024*1024)||profil.size>5*1024*1024)throw Error('Limite de 5 Mio par fichier.');const documents=[];for(const f of fichiers){const octets=new Uint8Array(await f.arrayBuffer());let b='';for(let i=0;i<octets.length;i+=8192)b+=String.fromCharCode(...octets.subarray(i,i+8192));documents.push({nom:f.name,base64:btoa(b)})}afficher(await appel('/api/importer',{documents,profil:await profil.text()}))});
+$('extraire').onclick=()=>action(async()=>{dossier=await appel(`/api/${dossier.id}/extraire`);afficher(dossier)});
+$('preparer').onclick=()=>action(async()=>{const faits={};document.querySelectorAll('#faits .fait').forEach(el=>{const val=el.querySelector('.val').value;if(val==='')throw Error('Renseignez toutes les valeurs.');faits[el.dataset.cle]={valeur:Number(val),document:Number(el.querySelector('.doc').value),ligne:Number(el.querySelector('.ligne').value),motif:el.querySelector('.motif').value}});dossier=await appel(`/api/${dossier.id}/preparer`,{faits,revue_documentaire:recueillirRevue()});$('validation').hidden=false;$('accord').checked=false;$('calculer').disabled=true;$('resultat').hidden=true;window.parcours?.summary(); window.parcours?.open(2)});
+$('accord').onchange=()=>{$('calculer').disabled=!$('accord').checked};
+function afficherResultat(d){dossier=d;const r=dossier.resultat;const chiffre=c=>c.statut===0?`${c.capacite_utile_kwh.toLocaleString('en-GB',{maximumFractionDigits:2})} kWh`:'Non réalisable';$('chiffres').innerHTML=`<div><p>Départ au début de la fenêtre</p><p class="valeur">${chiffre(r.initial)}</p></div><div><p>Planning retenu</p><p class="valeur">${chiffre(r.retenu)}</p></div>`;$('conclusion').textContent=r.retenu.statut===0?`${uiText(r.methode)}. First start: ${r.debuts_heures[0]} h in the first block. Joint search status: ${uiText(r.preuve_solveur?.statut||"not tested")}.`:`The tested schedule does not satisfy the constraints: ${uiText(r.retenu.message)}. This does not prove that every possible schedule would fail.`;if(dossier.audit_documentaire?.anomalies.length)$('conclusion').textContent+=' Simulation with document issues: review decisions are retained in the report. Site feasibility still needs confirmation.';if(dossier.audit_documentaire?.anomalies.some(a=>a.code==='reserve_prioritaire'))$('conclusion').textContent+=' Mandatory backup reserve is not modelled: zero peak smoothing does not mean the site needs no battery.';$('rapport-lisible').href=`/api/${dossier.id}/rapport-lisible?lang=en`;$('donnees').href=`/api/${dossier.id}/donnees`;$('resultat').hidden=false;afficherGraphique(dossier);comparerCalculs();window.parcours?.outcome(); window.parcours?.open(3);window.factory?.completed(d);}
+$('calculer').onclick=()=>action(async()=>{
+  const request=()=>appel(`/api/${dossier.id}/calculer`,{revision:dossier.revision,validation:$('accord').checked});
+  const calculated=window.factory?await window.factory.process('simulation',request):await request();
+  afficherResultat(calculated);
+  // Section de sensibilité apportée par l'équipe sur main le 23/09 (sensibilite.js).
+  if (typeof afficherSensibilite === 'function') afficherSensibilite();
+});
+</script>
+
+<script src="/parcours.js?v=14"></script>
+<script src="/factory.js?v=13"></script>
+</body></html>

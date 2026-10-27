@@ -1,0 +1,8 @@
+# Versions de la démonstration vérifiée le 22 septembre 2026.
+fastapi==0.141.1
+uvicorn==0.53.0
+numpy==2.5.3
+scipy==1.18.1
+ortools==9.15.6755
+pypdfium2==5.13.0
+Pillow==12.3.0

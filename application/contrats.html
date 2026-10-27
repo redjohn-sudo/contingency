@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comparer les contrats | Contingency</title><style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#18232b;font-family:Arial,sans-serif;line-height:1.55}main{max-width:65rem;margin:auto;padding:clamp(1rem,4vw,3rem)}header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;border-bottom:1px solid #c7d0d8;padding-bottom:1rem}h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;letter-spacing:-.035em}h2{font-size:1.2rem}a{color:#164cb0;text-underline-offset:3px}p{max-width:75ch}p,li{overflow-wrap:anywhere}label{display:block;margin:1rem 0}input,select,button{font:inherit;padding:.7rem;border:1px solid #a5b2bc;border-radius:4px}input{display:block;width:100%;margin-top:.4rem;min-width:0}button{background:#164cb0;color:white;cursor:pointer;min-height:44px}button:disabled{opacity:.5;cursor:wait}.actions{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}.secondaire{color:#164cb0;background:white}section,fieldset{min-width:0;border:0;border-top:1px solid #c7d0d8;margin-top:1.5rem;padding:1rem 0}legend{font-weight:bold;padding-right:1rem}.muted{color:#50606d}#erreur{color:#a12b30}#resume{font-weight:bold}.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #7d9ad3;outline-offset:3px}[hidden]{display:none!important}
+</style></head><body><main>
+<header><a href="/demo">contingency.</a><a href="/import-compteur">Préparer un export compteur</a></header>
+<h1>Comparer les contrats sur votre consommation.</h1>
+<p>GTV fixe, CBC rémunéré et droits alternatifs. Une année complète de mesures et les pièces du raccordement permettent de comparer les coûts et les limites de chaque option.</p>
+<p>La référence est un contrat actuel entièrement fixe, sans CBC actif. Les autres types de contrat actuel ne sont pas encore pris en charge.</p>
+<p class="muted">Une pièce, un prix ou une date manquants restent à confirmer. Aucun gagnant financier n’est annoncé dans ce cas.</p>
+<p id="erreur" role="alert"></p>
+<form id="formulaire">
+<fieldset><legend>1. Ouvrir l’année de mesures</legend>
+<label>Profil préparé, au quart d’heure<input id="profil" type="file" accept=".csv" required></label>
+<p class="muted">Consommation afname, puissance moyenne en kW, fins d’intervalle avec décalage UTC. Utilisez le lien de préparation si les conventions de l’export diffèrent.</p>
+<button type="button" id="analyser" class="secondaire">Vérifier la période</button><p id="mesures" aria-live="polite"></p>
+<a id="modele" hidden>Télécharger la fiche des contrats à documenter</a>
+</fieldset>
+<fieldset><legend>2. Joindre les informations contractuelles</legend>
+<label>Fiche des contrats, fichier JSON<input id="fiche" type="file" accept=".json" required></label>
+<p>La fiche rassemble le GTV, les tarifs, les offres et leurs sources. La validation reste à la charge de la personne qui a relu les pièces. L’application ne contacte pas le gestionnaire.</p>
+</fieldset>
+<label>Langue du rapport<select id="langue"><option value="fr">Français</option><option value="nl">Nederlands</option></select></label>
+<button id="comparer" type="submit">Comparer les options</button>
+</form>
+<section id="resultat" hidden aria-live="polite"><h2 id="resume"></h2><p id="contexte"></p><div class="actions"><a id="rapport" target="_blank" rel="noopener">Ouvrir le rapport</a><a id="telecharger">Télécharger le rapport</a><a id="calcul">Télécharger les calculs</a></div><ul id="options"></ul></section>
+<section><h2>Conserver le droit ferme fait partie de la décision.</h2><p>Une baisse du GTV peut réduire la capacité disponible. Le retour à l’ancien niveau peut être refusé en congestion. L’économie de tarif ne garantit pas la restitution de cette capacité.</p></section>
+<script>
+'use strict';
+const element=nom=>document.getElementById(nom);
+let revision=0, liens=[];
+function effacer(){revision++;element('resultat').hidden=true;element('modele').hidden=true;element('mesures').textContent='';element('erreur').textContent='';for(const lien of liens)URL.revokeObjectURL(lien);liens=[];}
+function lien(nom,texte,type,fichier){const url=URL.createObjectURL(new Blob([texte],{type}));liens.push(url);element(nom).href=url;if(fichier)element(nom).download=fichier;element(nom).hidden=false;}
+element('formulaire').addEventListener('input',effacer);
+async function lire(nom){const fichier=element(nom).files[0];if(!fichier)throw Error('Choisissez le fichier '+nom+'.');if(fichier.size>20*1024*1024)throw Error('Fichier limité à 20 Mio.');return new TextDecoder('utf-8',{fatal:true}).decode(await fichier.arrayBuffer());}
+async function appeler(chemin,contenu){const reponse=await fetch(chemin,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(contenu)});const resultat=await reponse.json();if(!reponse.ok)throw Error(resultat.detail||'La comparaison n’a pas abouti.');return resultat;}
+async function travailler(bouton,operation){element('erreur').textContent='';bouton.disabled=true;try{await operation();}catch(erreur){element('erreur').textContent=erreur.message;}finally{bouton.disabled=false;}}
+element('analyser').onclick=()=>travailler(element('analyser'),async()=>{effacer();const version=revision;const resultat=await appeler('/api/contrats/profil',{texte:await lire('profil')});if(version!==revision)return;element('mesures').textContent=`${resultat.profil.annee_mesuree} : ${resultat.profil.quarts.toLocaleString('fr-FR')} quarts, pointe ${resultat.profil.pointe_kw.toLocaleString('fr-FR')} kW. Qualité et provenance restent à confirmer.`;lien('modele',JSON.stringify(resultat.modele,null,2),'application/json','contrats-a-documenter.json');});
+element('formulaire').onsubmit=evenement=>{evenement.preventDefault();travailler(element('comparer'),async()=>{effacer();const version=revision;const texte=await lire('profil'),configuration=JSON.parse(await lire('fiche'));const sortie=await appeler('/api/contrats/comparer',{texte,configuration,langue:element('langue').value});if(version!==revision)return;const r=sortie.resultat,meilleure=r.options.find(o=>o.id===r.dominante);element('resume').textContent=meilleure?'Coût annuel de référence le plus faible : '+meilleure.libelle:'Aucun gagnant financier établi';element('contexte').textContent=r.portee||(r.manquants.length?r.manquants.join(' '):'Compléter les pièces du raccordement pour comparer les contrats.');element('options').replaceChildren(...r.options.map(o=>{const li=document.createElement('li');li.textContent=o.libelle+' : '+({comparable:'pièces déclarées vérifiées',incomplet:'pièces ou paramètres manquants',incompatible:'incompatible avec ce profil ou cette offre',reference_depassee:'référence actuelle dépassée, à régulariser'}[o.statut]);return li;}));lien('rapport',sortie.html,'text/html');lien('telecharger',sortie.html,'text/html','comparaison.html');lien('calcul',JSON.stringify(r,null,2),'application/json','comparaison.json');element('resultat').hidden=false;});};
+</script></main></body></html>

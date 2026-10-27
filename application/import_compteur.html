@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meter readings | Contingency</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;color:#202738;background:#fff;line-height:1.5}
+main{max-width:68rem;margin:auto;padding:clamp(1rem,4vw,3rem)}header{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;border-bottom:1px solid #dfe3e9;padding-bottom:1rem}
+a{color:#304fea;text-underline-offset:3px}.brand{font-size:1.35rem;font-weight:700;text-decoration:none;color:inherit}h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.15;letter-spacing:-.04em}h2,legend{font-size:1.15rem;font-weight:650}p{max-width:72ch}.muted,small{color:#536078}
+fieldset{border:0;border-top:1px solid #dfe3e9;padding:1.3rem 0;margin:1.4rem 0;min-width:0}legend{padding-right:1rem}.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:1rem 1.4rem}
+label{display:flex;flex-direction:column;gap:.4rem;font-size:.9rem;min-width:0}input,select,textarea,button{font:inherit;border-radius:5px}input,select,textarea{width:100%;min-width:0;border:1px solid #aab3c2;background:white;color:inherit;padding:.65rem}input[type=checkbox]{width:auto}input[type=file]{padding:.5rem}small{font-size:.82rem}textarea{resize:vertical;min-height:6rem}
+button,.telecharger{display:inline-flex;justify-content:center;align-items:center;padding:.7rem 1rem;min-height:44px;border:1px solid #304fea;background:#304fea;color:white;font-weight:600;cursor:pointer;text-decoration:none}button:disabled{opacity:.55;cursor:wait}.secondaire{color:#304fea;background:white}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #7e91ff;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.case{flex-direction:row;align-items:flex-start}.tableau{max-width:100%;overflow:auto;border:1px solid #dfe3e9;margin:1rem 0}table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:.6rem;text-align:left;white-space:nowrap;border-bottom:1px solid #e5e8ed}th{background:#f5f7fb}#erreur{color:#9c2535;overflow-wrap:anywhere}#resultat{border-top:2px solid #304fea;padding-top:1rem}#resultat p,#resultat li,#heure p,#erreur{overflow-wrap:anywhere}[hidden]{display:none!important}
+</style>
+</head>
+<body><main>
+<header><a class="brand" href="/demo">contingency.</a><a href="/contrats">Compare transport contracts</a><span class="muted">Meter readings</span></header>
+<h1>Prepare your meter readings.</h1>
+<p>Select one import channel and confirm how its readings are recorded. Keep the original file. The prepared CSV uses average kW and the end of each 15-minute interval.</p>
+<p class="muted">No AI analysis is used. This screen prepares a file for the study; it does not change your current study.</p>
+<div id="erreur" role="alert"></div>
+<form id="lecture">
+<fieldset><legend>1. Open the export</legend><div class="grille">
+<label>CSV file<input id="fichier" type="file" accept=".csv,.txt,.tsv" required><small>Up to 20 MB. Export the original readings, without spreadsheet conversion.</small></label>
+<label>Text encoding<select id="encodage"><option value="utf-8">UTF-8</option><option value="windows-1252">Windows 1252</option><option value="utf-16le">UTF-16 LE</option><option value="utf-16be">UTF-16 BE</option></select></label>
+<label>Column separator<select id="separateur"><option value=";">Semicolon ;</option><option value=",">Comma ,</option><option value="tab">Tab</option></select></label>
+<label>Lines before the column names<input id="preambule" type="number" min="0" max="50" step="1" value="0" required></label>
+</div></fieldset>
+<button id="voir" type="submit">Preview the file</button>
+</form>
+<section id="apercu" hidden><h2>Original values</h2><p id="nombre-lignes" class="muted"></p><div id="tableau" class="tableau" tabindex="0" aria-label="First five rows, scroll horizontally to inspect every column"></div></section>
+<form id="conversion" hidden>
+<fieldset><legend>2. Select the readings</legend><div class="grille">
+<label>Export provider<input id="fournisseur" required placeholder="Name shown on your export"></label>
+<label>Timestamp or time column<select id="colonne-temps" class="colonne" required></select></label>
+<label>Value column<select id="colonne-valeur" class="colonne" required></select></label>
+<label>Separate date column<select id="colonne-date" class="colonne facultative"></select><small>Leave empty if date and time are in the same column.</small></label>
+<label>Meter identifier column<select id="colonne-compteur" class="colonne facultative"></select></label>
+<label>Keep this meter identifier<input id="filtre-compteur" placeholder="Exact value, if more than one meter"></label>
+<label>Channel column<select id="colonne-canal" class="colonne facultative"></select></label>
+<label>Keep this channel<input id="filtre-canal" placeholder="Exact value of the import channel"></label>
+</div><p><label class="case"><input type="checkbox" id="compteur-unique">If there is no meter identifier column, I confirm that the file contains one meter only.</label></p>
+</fieldset>
+<fieldset><legend>3. Confirm units and time</legend><div class="grille">
+<label>Unit of each value<select id="unite" required><option value="">Choose the declared unit</option><option value="kw">Average power, kW</option><option value="kwh_par_quart">Energy per 15 minutes, kWh</option></select><small>Cumulative meter registers are not supported.</small></label>
+<label>Timestamp marks<select id="marque" required><option value="">Choose start or end</option><option value="debut">Start of the interval</option><option value="fin">End of the interval</option></select></label>
+<label>Timestamp format<select id="format" required><option value="">Match your export</option><option value="ISO8601">2026-12-31T23:45:00+01:00 (ISO)</option><option value="%d-%m-%Y %H:%M">31-12-2026 23:45</option><option value="%d/%m/%Y %H:%M">31/12/2026 23:45</option><option value="%d-%m-%Y %H:%M:%S">31-12-2026 23:45:00</option><option value="%d-%m-%Y %H:%M%z">31-12-2026 23:45+0100</option></select></label>
+<label>Time zone<select id="fuseau"><option value="Europe/Amsterdam">Europe/Amsterdam</option><option value="UTC">UTC</option></select><small>Zone in which the file writes its timestamps (UTC for a trailing Z); a written offset that contradicts it stops the import. An ambiguous local hour requires its explicit UTC offset.</small></label>
+<label>Decimal mark<select id="decimal"><option value=",">Comma, as in 1,25</option><option value=".">Point, as in 1.25</option></select></label>
+<label>Thousands separator<select id="milliers"><option value="aucun">None</option><option value=".">Point, as in 1.000</option><option value=",">Comma, as in 1,000</option><option value="espace">Space, as in 1 000</option></select></label>
+</div><p><label class="case"><input type="checkbox" id="intervalles" required>I confirm these are 15-minute import readings (afname), not cumulative registers, export readings or monthly totals.</label></p>
+</fieldset>
+<fieldset><legend>4. Measurement quality</legend><div class="grille">
+<label>Status column<select id="colonne-statut" class="colonne facultative"></select><small>If absent, quality is recorded as unknown.</small></label>
+<label>Measured status values<textarea id="statuts-mesures" placeholder="One exact value per line"></textarea><small>Only if the provider documents these values as measured readings.</small></label>
+<label>Valid status values<textarea id="statuts-valides" placeholder="One exact value per line"></textarea><small>Validated, origin not documented: not presented as measured.</small></label>
+<label>Estimated status values<textarea id="statuts-estimes" placeholder="One exact value per line"></textarea><small>Estimated readings remain marked in the import record.</small></label>
+</div><p class="muted">Any other status in the selected channel stops the import.</p></fieldset>
+<button id="convertir" type="submit">Check and prepare the CSV</button>
+</form>
+<section id="heure" hidden aria-live="polite"><h2>Repeated hour to confirm</h2><p id="heure-texte"></p><div class="tableau"><table id="heure-paires"></table></div><button id="heure-confirmer" type="button">Confirm this reading of the repeated hour</button><p class="muted">The confirmation applies to this file with these settings only. Changing a setting requires a new confirmation.</p></section>
+<section id="resultat" hidden aria-live="polite"><h2>Readings prepared</h2><p id="resume"></p><ul id="avertissements"></ul>
+<h3>Check before use</h3><p class="muted">A wrong unit multiplies or divides every peak by 4. Compare each month with the invoice or the contract before using these readings.</p>
+<div id="jours" class="tableau" tabindex="0"></div>
+<label>Contracted transport capacity, kW (optional)<input id="gtv" type="number" min="0" step="any" inputmode="decimal"></label>
+<div id="pointes" class="tableau" tabindex="0"></div><div class="actions"><a id="telecharger-csv" class="telecharger">Download prepared CSV</a><a id="telecharger-audit" class="telecharger secondaire">Download import record</a></div><p class="muted">Keep both files with the original export. Compare the same period with its transport invoice before drawing a capacity conclusion.</p></section>
+<script>
+'use strict';
+const element=identifiant=>document.getElementById(identifiant);
+let texteSource='',empreinteOctets='',lectureCourante=null,urls=[],revision=0,confirmationHeure=null,controle=null;
+const val=identifiant=>element(identifiant).value;
+function optionsLecture(){return {separateur:val('separateur')==='tab'?'\t':val('separateur'),lignes_avant_entete:Number(val('preambule'))};}
+function effacerResultat(){revision++;element('heure').hidden=true;element('resultat').hidden=true;for(const url of urls)URL.revokeObjectURL(url);urls=[];}
+function invaliderLecture(){confirmationHeure=null;lectureCourante=null;texteSource='';element('conversion').hidden=true;element('apercu').hidden=true;effacerResultat();}
+element('lecture').addEventListener('input',invaliderLecture);
+// Un réglage changé retire la confirmation de l'heure répétée : elle ne valait que pour les réglages confirmés.
+element('conversion').addEventListener('input',()=>{confirmationHeure=null;effacerResultat();});
+async function requete(chemin,contenu){let reponse,resultat;
+  try{reponse=await fetch(chemin,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(contenu)});}catch{throw Error('The workshop server could not be reached. Check that it is running, then try again.');}
+  try{resultat=await reponse.json();}catch{throw Error(`The workshop server returned an unreadable response (HTTP ${reponse.status}).`);}
+  if(!reponse.ok){const erreur=Error(resultat.detail||'Import failed.');erreur.constats=Array.isArray(resultat.constats)?resultat.constats:[];throw erreur;}return resultat;}
+function tableau(entetes,lignes){const t=document.createElement('table'),e=document.createElement('tr');for(const nom of entetes)e.append(cellule('th',nom));t.append(e);for(const ligne of lignes){const r=document.createElement('tr');for(const x of ligne)r.append(cellule('td',x));t.append(r);}return t;}
+const nombreEn=x=>x.toLocaleString('en-GB',{maximumFractionDigits:3});
+const motifsJour={ete:'Clock change to summer time',hiver:'Clock change to winter time',partiel:'Partial day: start or end of the export'};
+function afficherControle(){if(!controle)return;const autre=controle.autre_unite==='kw'?'average power (kW)':'energy per 15 minutes (kWh)',gtv=Number(val('gtv'));
+  const jours=[['First day',controle.reference.premier],...(controle.reference.ete?[['A summer day',controle.reference.ete]]:[])].map(([nom,j])=>[j.jour,String(j.quarts),nom]).concat(controle.jours.map(j=>[j.jour,String(j.quarts),motifsJour[j.motif]]));
+  element('jours').replaceChildren(tableau(['Day','Quarter-hours','Meaning'],jours));
+  element('pointes').replaceChildren(tableau(['Month','Peak as declared, kW',`Peak if the values were ${autre}, kW`,...(gtv>0?['Declared peak, % of the contracted capacity']:[])],
+    controle.pointes_mensuelles.map(p=>[p.mois,nombreEn(p.pointe_kw),nombreEn(p.pointe_kw_autre_unite),...(gtv>0?[nombreEn(100*p.pointe_kw/gtv)+' %']:[])])));}
+element('gtv').addEventListener('input',afficherControle);
+function proposerHeure(constats){const c=(constats||[]).find(x=>x.code==='HEURE_REPETEE_A_CONFIRMER');element('heure').hidden=!c;if(!c)return;const p=c.parametres;
+  element('heure-texte').textContent=`Repeated hour on ${p.jour}: following the order of the rows in your file, lines ${p.lignes_ete[0]} to ${p.lignes_ete.at(-1)} would be read as summer time (${p.decalages[0]}) and lines ${p.lignes_hiver[0]} to ${p.lignes_hiver.at(-1)} as winter time (${p.decalages[1]}). File SHA-256 (original bytes): ${empreinteOctets}. Text SHA-256 after decoding, bound to the confirmation: ${p.empreinte}.`;
+  // Les deux mesures de chaque heure répétée, telles qu'écrites dans le fichier, avant confirmation (textContent : valeurs du fichier).
+  const table=element('heure-paires');table.replaceChildren();const entete=table.insertRow();
+  for(const titre of['Local hour','First occurrence (summer time)','Second occurrence (winter time)']){const th=document.createElement('th');th.textContent=titre;entete.append(th);}
+  for(const paire of c.paires||[]){const ligne=table.insertRow();ligne.insertCell().textContent=paire.heure;
+    for(const o of[paire.ete,paire.hiver])ligne.insertCell().textContent=`line ${o.ligne}: ${o.valeur} (${o.instant})`;}
+  element('heure-confirmer').onclick=()=>{confirmationHeure=p.identite;element('heure').hidden=true;element('conversion').requestSubmit();};}
+async function travailler(bouton,operation){element('erreur').textContent='';bouton.disabled=true;try{await operation();}catch(erreur){element('erreur').textContent=erreur.message||'Import failed.';element('erreur').scrollIntoView({block:'center'});}finally{bouton.disabled=false;}}
+function cellule(type,texte){const cellule=document.createElement(type);cellule.textContent=texte;return cellule;}
+element('lecture').onsubmit=evenement=>{evenement.preventDefault();travailler(element('voir'),async()=>{
+  invaliderLecture();const version=revision,fichier=element('fichier').files[0],reglages=optionsLecture(),encodage=val('encodage');if(!fichier)throw Error('Choose a CSV file.');if(fichier.size>20*1024*1024)throw Error('The export exceeds 20 MB.');
+  const octets=await fichier.arrayBuffer();let texte;try{texte=new TextDecoder(encodage,{fatal:true}).decode(octets);}catch{throw Error('This encoding cannot read the file. Select its original text encoding.');}
+  const empreinte=[...new Uint8Array(await crypto.subtle.digest('SHA-256',octets))].map(x=>x.toString(16).padStart(2,'0')).join('');
+  const apercu=await requete('/api/compteur/apercu',{texte,...reglages});if(version!==revision)return;texteSource=texte;empreinteOctets=empreinte;lectureCourante={...reglages,nom:fichier.name,encodage};
+  const tableau=document.createElement('table'),entete=document.createElement('tr');for(const nom of apercu.colonnes)entete.append(cellule('th',nom));tableau.append(entete);
+  for(const ligne of apercu.exemples){const rangee=document.createElement('tr');for(const nom of apercu.colonnes)rangee.append(cellule('td',ligne.valeurs[nom]));tableau.append(rangee);}element('tableau').replaceChildren(tableau);
+  element('nombre-lignes').textContent=`${apercu.nombre_lignes.toLocaleString('en-GB')} rows. The first five are shown without interpretation.`;
+  document.querySelectorAll('select.colonne').forEach(select=>{select.replaceChildren(new Option(select.classList.contains('facultative')?'None':'Choose a column',''));for(const nom of apercu.colonnes)select.add(new Option(nom,nom));});
+  element('conversion').reset();element('apercu').hidden=false;element('conversion').hidden=false;
+});};
+element('conversion').onsubmit=evenement=>{evenement.preventDefault();travailler(element('convertir'),async()=>{
+  effacerResultat();const version=revision;if(!lectureCourante)throw Error('Preview this file before converting it.');
+  const filtres=Object.create(null);for(const [colonne,filtre] of [['colonne-compteur','filtre-compteur'],['colonne-canal','filtre-canal']]){if(val(filtre)&&!val(colonne))throw Error('Select the column for each filter.');if(val(colonne)&&val(filtre))filtres[val(colonne)]=val(filtre);}
+  if(val('colonne-canal')&&!val('filtre-canal'))throw Error('Select one import channel with its exact value.');
+  const confirmee=confirmationHeure;const statuts={};for(const [identifiant,nature] of [['statuts-mesures','mesure'],['statuts-valides','valide'],['statuts-estimes','estime']]){for(const statut of val(identifiant).split('\n').map(x=>x.trim()).filter(Boolean)){if(Object.hasOwn(statuts,statut))throw Error('A status value can have one meaning only.');Object.defineProperty(statuts,statut,{value:nature,enumerable:true});}}
+  const configuration={...lectureCourante,meetbedrijf:val('fournisseur'),colonne_temps:val('colonne-temps'),colonne_date:val('colonne-date'),colonne_valeur:val('colonne-valeur'),colonne_compteur:val('colonne-compteur'),compteur_unique:element('compteur-unique').checked,filtres,unite:val('unite'),kanaal:'afname',nature_valeurs:'intervalle',pas_minutes:15,format_temps:val('format'),fuseau:val('fuseau'),horodatage_marque:val('marque'),decimal:val('decimal'),milliers:val('milliers'),colonne_statut:val('colonne-statut'),statuts};
+  if(confirmee)configuration.heure_repetee_confirmee=confirmee;
+  let resultat;try{resultat=await requete('/api/compteur/convertir',{texte:texteSource,configuration,empreinte_octets:empreinteOctets});}catch(erreur){proposerHeure(erreur.constats);throw erreur;}
+  if(version!==revision)return;
+  const nombre=resultat.valeurs_kw.length,energie=resultat.valeurs_kw.reduce((a,b)=>a+b,0)/4,pointe=Math.max(...resultat.valeurs_kw);
+  element('resume').textContent=`${nombre.toLocaleString('en-GB')} readings retained, ${resultat.provenance.lignes_ecartees.toLocaleString('en-GB')} rows excluded. Peak: ${pointe.toLocaleString('en-GB',{maximumFractionDigits:3})} kW. Energy: ${energie.toLocaleString('en-GB',{maximumFractionDigits:3})} kWh.`;
+  element('avertissements').replaceChildren(...resultat.avertissements.map(texte=>cellule('li',texte)));
+  // Même audit que la commande : tout le résultat hors séries, journal de l'heure répétée et contrôle compris.
+  const {csv:_,valeurs_kw:__,horodatages:___,...audit}=resultat;controle=resultat.controle;afficherControle();
+  for(const [identifiant,contenu,type,nom] of [['telecharger-csv',resultat.csv,'text/csv;charset=utf-8','profil.csv'],['telecharger-audit',JSON.stringify(audit,null,2)+'\n','application/json','import.json']]){const url=URL.createObjectURL(new Blob([contenu],{type}));urls.push(url);element(identifiant).href=url;element(identifiant).download=nom;}
+  element('resultat').hidden=false;element('resultat').scrollIntoView({block:'start'});
+});};
+</script>
+</main></body></html>
